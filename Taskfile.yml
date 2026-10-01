@@ -15,7 +15,7 @@ tasks:
   build:
     desc: Compile the binary
     cmds:
-      - go build -o bin/{{.BINARY}} .
+      - go build -ldflags="-X main.version={{.VERSION}}" -o bin/{{.BINARY}} .
     sources:
       - "**/*.go"
       - go.mod

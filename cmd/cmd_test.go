@@ -13,7 +13,7 @@ import (
 // execute runs args against a fresh root wired to store and returns output + error.
 func execute(t *testing.T, store internal.Store, args ...string) (string, error) {
 	t.Helper()
-	root := newRoot(store)
+	root := newRoot(store, "dev")
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 	root.SetErr(buf)
