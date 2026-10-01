@@ -11,7 +11,7 @@ German working-time law, and produces reports for company time-tracking tools.
 
 ### Download a pre-built binary
 
-Go to the [latest release](https://github.com/astepanovs/ztime/releases/latest)
+Go to the [latest release](https://github.com/andrejsstepanovs/ztime/releases/latest)
 and download the binary for your platform.
 
 | File | Platform |
@@ -27,7 +27,7 @@ and download the binary for your platform.
 
 ```sh
 # Replace VERSION and PLATFORM with the values from the release page.
-curl -L https://github.com/astepanovs/ztime/releases/latest/download/ztime_VERSION_PLATFORM \
+curl -L https://github.com/andrejsstepanovs/ztime/releases/latest/download/ztime_VERSION_PLATFORM \
   -o /usr/local/bin/ztime
 chmod +x /usr/local/bin/ztime
 ztime --help
@@ -36,7 +36,7 @@ ztime --help
 #### macOS (Apple Silicon example)
 
 ```sh
-curl -L https://github.com/astepanovs/ztime/releases/latest/download/ztime_v1.0.0_darwin_arm64 \
+curl -L https://github.com/andrejsstepanovs/ztime/releases/latest/download/ztime_v1.0.0_darwin_arm64 \
   -o /usr/local/bin/ztime
 chmod +x /usr/local/bin/ztime
 ztime --help
@@ -52,7 +52,7 @@ that is on your `PATH`, for example `C:\Users\YOU\bin\ztime.exe`.
 Requirements: Go 1.21 or later, [Task](https://taskfile.dev).
 
 ```sh
-git clone https://github.com/astepanovs/ztime
+git clone https://github.com/andrejsstepanovs/ztime
 cd ztime
 task build        # produces bin/ztime
 ```
