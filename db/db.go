@@ -46,15 +46,15 @@ func openAt(path string) (*sql.DB, error) {
 }
 
 func dataPath() (string, error) {
-	home, err := os.UserHomeDir()
+	base, err := os.UserConfigDir()
 	if err != nil {
-		return "", fmt.Errorf("determine home directory: %w", err)
+		return "", fmt.Errorf("determine config directory: %w", err)
 	}
-	dir := filepath.Join(home, ".local", "share", "time")
+	dir := filepath.Join(base, "ztime")
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return "", fmt.Errorf("create data directory: %w", err)
 	}
-	return filepath.Join(dir, "time.db"), nil
+	return filepath.Join(dir, "ztime.db"), nil
 }
 
 func runMigrations(conn *sql.DB) error {

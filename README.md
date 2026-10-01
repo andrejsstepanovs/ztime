@@ -5,10 +5,51 @@ German working-time law, and produces reports for company time-tracking tools.
 
 ## Requirements
 
-- Go 1.21 or later
-- SQLite (provided by the pure-Go `modernc.org/sqlite` driver, no CGo required)
+- No runtime dependencies. Binaries are statically compiled.
 
 ## Install
+
+### Download a pre-built binary
+
+Go to the [latest release](https://github.com/astepanovs/ztime/releases/latest)
+and download the binary for your platform.
+
+| File | Platform |
+|------|----------|
+| `ztime_VERSION_linux_amd64` | Linux, Intel/AMD 64-bit |
+| `ztime_VERSION_linux_arm64` | Linux, ARM 64-bit |
+| `ztime_VERSION_darwin_amd64` | macOS, Intel |
+| `ztime_VERSION_darwin_arm64` | macOS, Apple Silicon |
+| `ztime_VERSION_windows_amd64.exe` | Windows, Intel/AMD 64-bit |
+| `ztime_VERSION_windows_arm64.exe` | Windows, ARM 64-bit |
+
+#### Linux and macOS
+
+```sh
+# Replace VERSION and PLATFORM with the values from the release page.
+curl -L https://github.com/astepanovs/ztime/releases/latest/download/ztime_VERSION_PLATFORM \
+  -o /usr/local/bin/ztime
+chmod +x /usr/local/bin/ztime
+ztime --help
+```
+
+#### macOS (Apple Silicon example)
+
+```sh
+curl -L https://github.com/astepanovs/ztime/releases/latest/download/ztime_v1.0.0_darwin_arm64 \
+  -o /usr/local/bin/ztime
+chmod +x /usr/local/bin/ztime
+ztime --help
+```
+
+#### Windows
+
+Download the `.exe` file from the release page. Move the file to a directory
+that is on your `PATH`, for example `C:\Users\YOU\bin\ztime.exe`.
+
+### Build from source
+
+Requirements: Go 1.21 or later, [Task](https://taskfile.dev).
 
 ```sh
 git clone https://github.com/astepanovs/ztime
@@ -20,8 +61,14 @@ Copy `bin/ztime` to a directory on your `PATH`.
 
 ## Database
 
-`ztime` stores data in `~/.local/share/time/time.db`. The tool creates this
+`ztime` stores data in a platform-specific directory. The tool creates the
 file on first run. Migrations run automatically at startup.
+
+| Platform | Location |
+|----------|----------|
+| Linux | `~/.config/ztime/ztime.db` |
+| macOS | `~/Library/Application Support/ztime/ztime.db` |
+| Windows | `%AppData%\ztime\ztime.db` |
 
 ## Quick start
 

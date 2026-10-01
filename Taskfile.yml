@@ -4,8 +4,8 @@ vars:
   BINARY: ztime
   MODULE:
     sh: go list -m
-  GO_FILES:
-    sh: find . -name "*.go" -not -path "./vendor/*" | tr '\n' ' '
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
 
 tasks:
   default:
@@ -71,7 +71,29 @@ tasks:
   clean:
     desc: Remove build artifacts and coverage report
     cmds:
-      - rm -rf bin/ coverage.out
+      - rm -rf bin/ release/ coverage.out
+
+  release:
+    desc: Build release binaries for all platforms into ./release/
+    vars:
+      TARGETS:
+        - GOOS=linux   GOARCH=amd64
+        - GOOS=linux   GOARCH=arm64
+        - GOOS=darwin  GOARCH=amd64
+        - GOOS=darwin  GOARCH=arm64
+        - GOOS=windows GOARCH=amd64
+        - GOOS=windows GOARCH=arm64
+    cmds:
+      - mkdir -p release
+      - |
+        for target in "linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64" "windows/arm64"; do
+          os="${target%%/*}"
+          arch="${target##*/}"
+          out="release/{{.BINARY}}_{{.VERSION}}_${os}_${arch}"
+          if [ "$os" = "windows" ]; then out="${out}.exe"; fi
+          echo "building $out"
+          GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version={{.VERSION}}" -o "$out" .
+        done
 
   ci:
     desc: Full CI pipeline -- tidy, mocks, build, lint, test
