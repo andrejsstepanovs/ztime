@@ -1,0 +1,9 @@
+with-expecter: true
+issue-845-fix: true
+packages:
+  github.com/astepanovs/ztime/internal:
+    interfaces:
+      Store:
+        config:
+          dir: mocks
+          outpkg: mocks

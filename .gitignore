@@ -1,0 +1,14 @@
+# binary
+bin/
+
+# test artifacts
+coverage.out
+
+# macOS
+.DS_Store
+
+# editor
+.idea/
+.vscode/
+*.swp
+*.swo

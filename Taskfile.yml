@@ -1,0 +1,83 @@
+version: "3"
+
+vars:
+  BINARY: ztime
+  MODULE:
+    sh: go list -m
+  GO_FILES:
+    sh: find . -name "*.go" -not -path "./vendor/*" | tr '\n' ' '
+
+tasks:
+  default:
+    desc: Run build, lint, and test (default)
+    deps: [build, lint, test]
+
+  build:
+    desc: Compile the binary
+    cmds:
+      - go build -o bin/{{.BINARY}} .
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - bin/{{.BINARY}}
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test ./...
+
+  test:unit:
+    desc: Run unit tests only (cmd package)
+    cmds:
+      - go test ./cmd/...
+
+  test:e2e:
+    desc: Run e2e tests only
+    cmds:
+      - go test ./e2e/...
+
+  test:coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  lint:fix:
+    desc: Run golangci-lint with auto-fix
+    cmds:
+      - golangci-lint run --fix ./...
+
+  mocks:
+    desc: Regenerate mocks using mockery
+    cmds:
+      - mockery
+    sources:
+      - internal/store.go
+    generates:
+      - mocks/mock_Store.go
+
+  tidy:
+    desc: Run go mod tidy
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Remove build artifacts and coverage report
+    cmds:
+      - rm -rf bin/ coverage.out
+
+  ci:
+    desc: Full CI pipeline -- tidy, mocks, build, lint, test
+    cmds:
+      - task: tidy
+      - task: mocks
+      - task: build
+      - task: lint
+      - task: test
