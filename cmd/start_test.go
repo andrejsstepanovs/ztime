@@ -103,6 +103,23 @@ func TestStart_NoGapWarningWhenSmallGap(t *testing.T) {
 	require.NotContains(t, out, "warning:")
 }
 
+func TestStart_NoGapWarningOvernight(t *testing.T) {
+	store := mocks.NewMockStore(t)
+	yesterday := time.Now().AddDate(0, 0, -1)
+	stoppedAt := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 18, 0, 0, 0, time.Local)
+	last := &internal.Entry{ID: 1, Tag: "work", StoppedAt: &stoppedAt}
+	sess := &internal.Entry{ID: 2, Tag: "work", StartedAt: time.Now()}
+
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
+	store.EXPECT().LastStopped("work").Return(last, nil)
+	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(sess, nil)
+
+	out, err := execute(t, store, "start")
+	require.NoError(t, err)
+	require.NotContains(t, out, "warning:")
+	require.NotContains(t, out, "gap")
+}
+
 func TestStart_BlocksConsecutiveStartUnlessForced(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	open := internal.Entry{ID: 1, Tag: "work", StartedAt: time.Now().Add(-time.Hour)}

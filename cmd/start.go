@@ -50,7 +50,9 @@ starting to work on. This is equivalent to running 'ztime start' followed by
 			}
 			if last != nil {
 				gap := startedAt.Sub(*last.StoppedAt)
-				if gap > gapWarnThreshold {
+				sameDay := last.StoppedAt.Year() == startedAt.Year() &&
+					last.StoppedAt.YearDay() == startedAt.YearDay()
+				if sameDay && gap > gapWarnThreshold {
 					fmt.Fprintf(cmd.ErrOrStderr(),
 						"warning: %s gap since last %s entry ended at %s\n",
 						fmtDuration(gap), tag, last.StoppedAt.Format(displayLayout))
