@@ -13,10 +13,10 @@ import (
 
 func TestValidate_NoIssues(t *testing.T) {
 	store := mocks.NewMockStore(t)
-	now := time.Now()
+	now := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 10, 0, 0, 0, time.Local)
 	stopped := now.Add(-1 * time.Hour)
 	entries := []internal.Entry{
-		{ID: 1, Tag: "work", StartedAt: now.Add(-2 * time.Hour), StoppedAt: &stopped},
+		{ID: 1, Tag: "work", StartedAt: stopped.Add(-1 * time.Hour), StoppedAt: &stopped},
 	}
 	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(entries, nil)
 

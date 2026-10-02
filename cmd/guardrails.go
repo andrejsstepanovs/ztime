@@ -3,12 +3,15 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/astepanovs/ztime/internal"
 )
 
 func loadEntries(store internal.Store) ([]internal.Entry, error) {
-	return store.List(internal.LogFilter{})
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	return store.List(internal.LogFilter{Date: &today})
 }
 
 func printExistingIssues(w io.Writer, entries []internal.Entry) {

@@ -16,7 +16,7 @@ func TestStart_Success(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	sess := &internal.Entry{ID: 1, Tag: "work", StartedAt: time.Now()}
 
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 	store.EXPECT().LastStopped("work").Return(nil, nil)
 	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(sess, nil)
 
@@ -29,7 +29,7 @@ func TestStart_AlreadyOpen(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	open := &internal.Entry{ID: 1, Tag: "work", StartedAt: time.Now()}
 
-	store.EXPECT().List(internal.LogFilter{}).Return([]internal.Entry{*open}, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return([]internal.Entry{*open}, nil)
 
 	_, err := execute(t, store, "start")
 	require.Error(t, err)
@@ -38,7 +38,7 @@ func TestStart_AlreadyOpen(t *testing.T) {
 
 func TestStart_StoreError(t *testing.T) {
 	store := mocks.NewMockStore(t)
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, errors.New("db error"))
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, errors.New("db error"))
 
 	_, err := execute(t, store, "start")
 	require.Error(t, err)
@@ -48,7 +48,7 @@ func TestStart_CustomTag(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	sess := &internal.Entry{ID: 2, Tag: "lunch", StartedAt: time.Now()}
 
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 	store.EXPECT().LastStopped("lunch").Return(nil, nil)
 	store.EXPECT().Create("lunch", mock.AnythingOfType("time.Time"), "").Return(sess, nil)
 
@@ -62,7 +62,7 @@ func TestStart_WithTask(t *testing.T) {
 	entry := &internal.Entry{ID: 3, Tag: "work", StartedAt: time.Now()}
 	activity := &internal.Activity{ID: 7, EntryID: 3, OccurredAt: entry.StartedAt, Text: "focus block"}
 
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 	store.EXPECT().LastStopped("work").Return(nil, nil)
 	store.EXPECT().CreateWithActivity("work", mock.AnythingOfType("time.Time"), "focus block").Return(entry, activity, nil)
 
@@ -78,7 +78,7 @@ func TestStart_GapWarning(t *testing.T) {
 	last := &internal.Entry{ID: 1, Tag: "work", StoppedAt: &stoppedAt}
 	sess := &internal.Entry{ID: 2, Tag: "work", StartedAt: time.Now()}
 
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 	store.EXPECT().LastStopped("work").Return(last, nil)
 	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(sess, nil)
 
@@ -94,7 +94,7 @@ func TestStart_NoGapWarningWhenSmallGap(t *testing.T) {
 	last := &internal.Entry{ID: 1, Tag: "work", StoppedAt: &stoppedAt}
 	sess := &internal.Entry{ID: 2, Tag: "work", StartedAt: time.Now()}
 
-	store.EXPECT().List(internal.LogFilter{}).Return(nil, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 	store.EXPECT().LastStopped("work").Return(last, nil)
 	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(sess, nil)
 
@@ -106,7 +106,7 @@ func TestStart_NoGapWarningWhenSmallGap(t *testing.T) {
 func TestStart_BlocksConsecutiveStartUnlessForced(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	open := internal.Entry{ID: 1, Tag: "work", StartedAt: time.Now().Add(-time.Hour)}
-	store.EXPECT().List(internal.LogFilter{}).Return([]internal.Entry{open}, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return([]internal.Entry{open}, nil)
 
 	out, err := execute(t, store, "start")
 	require.Error(t, err)
@@ -118,7 +118,7 @@ func TestStart_ForceAllowsConsecutiveStart(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	open := internal.Entry{ID: 1, Tag: "work", StartedAt: time.Now().Add(-time.Hour)}
 	created := &internal.Entry{ID: 2, Tag: "work", StartedAt: time.Now()}
-	store.EXPECT().List(internal.LogFilter{}).Return([]internal.Entry{open}, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return([]internal.Entry{open}, nil)
 	store.EXPECT().LastStopped("work").Return(nil, nil)
 	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(created, nil)
 
@@ -134,7 +134,7 @@ func TestStart_PrintsExistingIssuesAsWarnings(t *testing.T) {
 	stopped := now.Add(-time.Hour)
 	broken := internal.Entry{ID: 1, Tag: "other", StartedAt: now.Add(-12 * time.Hour), StoppedAt: &stopped}
 	created := &internal.Entry{ID: 2, Tag: "work", StartedAt: now}
-	store.EXPECT().List(internal.LogFilter{}).Return([]internal.Entry{broken}, nil)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return([]internal.Entry{broken}, nil)
 	store.EXPECT().LastStopped("work").Return(nil, nil)
 	store.EXPECT().Create("work", mock.AnythingOfType("time.Time"), "").Return(created, nil)
 
