@@ -49,4 +49,6 @@ func TestReport_MarksOpenPeriod(t *testing.T) {
 	require.NoError(t, err)
 	requireContains(t, out, "09:00 - open")
 	requireContains(t, out, "not ready to enter")
+	requireContains(t, out, "total")
+	requireContains(t, out, "(running)")
 }

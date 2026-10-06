@@ -49,9 +49,15 @@ must be stopped before they can be entered as complete periods.`,
 func printReport(out interface{ Write([]byte) (int, error) }, entries []internal.Entry) {
 	currentDate := ""
 	var dailyTotal time.Duration
+	hasOpenEntry := false
 	printTotal := func() {
 		if currentDate != "" {
-			fmt.Fprintf(out, "  total  %s\n", fmtDuration(dailyTotal))
+			total := fmtDuration(dailyTotal)
+			if hasOpenEntry {
+				fmt.Fprintf(out, "  total  %s (running)\n", total)
+			} else {
+				fmt.Fprintf(out, "  total  %s\n", total)
+			}
 		}
 	}
 
@@ -65,9 +71,15 @@ func printReport(out interface{ Write([]byte) (int, error) }, entries []internal
 			fmt.Fprintln(out, date)
 			currentDate = date
 			dailyTotal = 0
+			hasOpenEntry = false
 		}
 		if entry.StoppedAt == nil {
-			fmt.Fprintf(out, "  %s - open   not ready to enter\n", entry.StartedAt.Format(displayLayout))
+			dur := entry.Duration()
+			fmt.Fprintf(out, "  %s - open   %s (not ready to enter)\n",
+				entry.StartedAt.Format(displayLayout),
+				fmtDuration(dur))
+			dailyTotal += dur
+			hasOpenEntry = true
 			continue
 		}
 		fmt.Fprintf(out, "  %s - %s  %s\n",
