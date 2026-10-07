@@ -25,19 +25,36 @@ func newEditCmd(store internal.Store) *cobra.Command {
 				return fmt.Errorf("invalid id %q", args[0])
 			}
 
+			entry, err := store.Get(id)
+			if err == internal.ErrEntryNotFound {
+				return fmt.Errorf("entry #%d not found", id)
+			}
+			if err != nil {
+				return err
+			}
+
 			p := internal.EditParams{}
 			if cmd.Flags().Changed("tag") {
 				p.Tag = &tag
 			}
 			if startedAt != "" {
-				t, err := parseTimeArg(startedAt)
+				t, err := parseTimeArgOn(startedAt, entry.StartedAt)
 				if err != nil {
 					return fmt.Errorf("--start: %w", err)
 				}
 				p.StartedAt = &t
 			}
 			if stoppedAt != "" {
-				t, err := parseTimeArg(stoppedAt)
+				// Anchor a bare HH:MM to the day the stop lands on: the new
+				// start's day when both are edited, otherwise the existing
+				// stop's day (falling back to the start's day when open).
+				day := entry.StartedAt
+				if p.StartedAt != nil {
+					day = *p.StartedAt
+				} else if entry.StoppedAt != nil {
+					day = *entry.StoppedAt
+				}
+				t, err := parseTimeArgOn(stoppedAt, day)
 				if err != nil {
 					return fmt.Errorf("--stop: %w", err)
 				}

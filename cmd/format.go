@@ -11,20 +11,25 @@ const displayDateLayout = "2006-01-02"
 // parseTimeArg parses --at flag values. Accepts "HH:MM" (assumes today) or
 // full "2006-01-02T15:04" / "2006-01-02T15:04:05".
 func parseTimeArg(s string) (time.Time, error) {
+	return parseTimeArgOn(s, time.Now())
+}
+
+// parseTimeArgOn parses a time argument, anchoring a bare "HH:MM" to the
+// calendar day of ref. Full timestamps are used as-is.
+func parseTimeArgOn(s string, ref time.Time) (time.Time, error) {
 	layouts := []string{
 		"15:04",
 		"2006-01-02T15:04",
 		"2006-01-02T15:04:05",
 	}
-	now := time.Now()
 	for _, l := range layouts {
 		t, err := time.ParseInLocation(l, s, time.Local)
 		if err != nil {
 			continue
 		}
-		// For HH:MM shorthand, inject today's date.
+		// For HH:MM shorthand, inherit ref's date.
 		if l == "15:04" {
-			t = time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, time.Local)
+			t = time.Date(ref.Year(), ref.Month(), ref.Day(), t.Hour(), t.Minute(), 0, 0, time.Local)
 		}
 		return t, nil
 	}
