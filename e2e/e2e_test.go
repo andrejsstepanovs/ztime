@@ -456,3 +456,23 @@ func TestE2E_ReportRoundFlag(t *testing.T) {
 	require.NoError(t, err)
 	requireContains(t, out, "09:07 - 12:13  3h 6m")
 }
+
+func TestE2E_RoundTrimsOverlappingNeighbours(t *testing.T) {
+	run := harness(t)
+
+	// One-minute gap: rounding to 10 would otherwise overlap the entries.
+	_, err := run("start", "--at", "2026-10-02T10:00")
+	require.NoError(t, err)
+	_, err = run("stop", "--at", "2026-10-02T11:55", "--force")
+	require.NoError(t, err)
+	_, err = run("start", "--at", "2026-10-02T11:56", "--force")
+	require.NoError(t, err)
+	_, err = run("stop", "--at", "2026-10-02T12:31", "--force")
+	require.NoError(t, err)
+
+	out, err := run("report", "--date", "2026-10-02", "--round", "10")
+	require.NoError(t, err)
+	requireContains(t, out, "10:00 - 11:50  1h 50m")
+	requireContains(t, out, "11:50 - 12:40  50m")
+	requireContains(t, out, "total  2h 40m")
+}

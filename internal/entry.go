@@ -33,6 +33,34 @@ func (e Entry) Rounded(step time.Duration) Entry {
 	return e
 }
 
+// RoundEntries rounds every entry via Rounded and then trims overlapping
+// boundaries: an entry's rounded stop never lands after the next same-tag
+// entry's rounded start, so rounding cannot invent work between entries.
+// Entries must be in chronological order, as returned by Store.List. Other
+// tags in between (e.g. lunch) are skipped, not trimmed into.
+func RoundEntries(entries []Entry, step time.Duration) []Entry {
+	out := make([]Entry, len(entries))
+	for i := range entries {
+		out[i] = entries[i].Rounded(step)
+	}
+	for i := range out {
+		if out[i].StoppedAt == nil {
+			continue
+		}
+		for j := i + 1; j < len(out); j++ {
+			if out[j].Tag != out[i].Tag {
+				continue
+			}
+			if out[i].StoppedAt.After(out[j].StartedAt) {
+				stop := out[j].StartedAt
+				out[i].StoppedAt = &stop
+			}
+			break
+		}
+	}
+	return out
+}
+
 func roundDown(t time.Time, step time.Duration) time.Time {
 	stepMin := int(step / time.Minute)
 	minutes := t.Hour()*60 + t.Minute()

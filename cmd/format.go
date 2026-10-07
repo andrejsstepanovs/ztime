@@ -65,9 +65,5 @@ func applyRounding(entries []internal.Entry, minutes int) ([]internal.Entry, err
 	if minutes == 0 {
 		return entries, nil
 	}
-	step := time.Duration(minutes) * time.Minute
-	for i := range entries {
-		entries[i] = entries[i].Rounded(step)
-	}
-	return entries, nil
+	return internal.RoundEntries(entries, time.Duration(minutes)*time.Minute), nil
 }

@@ -58,6 +58,25 @@ func TestBalance_RoundFlag(t *testing.T) {
 	requireContains(t, out, "worked 8h 0m  target 8h 0m  balance +0m")
 }
 
+func TestLog_RoundTrimsOverlapInOutput(t *testing.T) {
+	first := internal.Entry{ID: 1, Tag: "work",
+		StartedAt: time.Date(2026, 10, 6, 10, 0, 0, 0, time.Local),
+		StoppedAt: ptrTime(time.Date(2026, 10, 6, 11, 55, 30, 0, time.Local))}
+	second := internal.Entry{ID: 2, Tag: "work",
+		StartedAt: time.Date(2026, 10, 6, 11, 56, 0, 0, time.Local),
+		StoppedAt: ptrTime(time.Date(2026, 10, 6, 12, 31, 0, 0, time.Local))}
+	store := mocks.NewMockStore(t)
+	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return([]internal.Entry{first, second}, nil)
+
+	out, err := execute(t, store, "log", "--round", "10")
+	require.NoError(t, err)
+	requireContains(t, out, "10:00 - 11:50  1h 50m")
+	requireContains(t, out, "11:50 - 12:40  50m")
+	requireContains(t, out, "work      2h 40m")
+}
+
+func ptrTime(t time.Time) *time.Time { return &t }
+
 func TestRound_NegativeValueErrors(t *testing.T) {
 	store := mocks.NewMockStore(t)
 	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
