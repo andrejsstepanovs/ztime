@@ -16,6 +16,7 @@ import (
 func newLogCmd(store internal.Store) *cobra.Command {
 	var dateStr, weekStr, tag string
 	var asJSON bool
+	var round int
 
 	cmd := &cobra.Command{
 		Use:   "log",
@@ -23,7 +24,8 @@ func newLogCmd(store internal.Store) *cobra.Command {
 		Example: `  ztime log
   ztime log --date yesterday
   ztime log --week last
-  ztime log --tag work --json`,
+  ztime log --tag work --json
+  ztime log --round 15`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Default to today when no date/week filter is given.
 			if dateStr == "" && weekStr == "" {
@@ -36,6 +38,10 @@ func newLogCmd(store internal.Store) *cobra.Command {
 			}
 
 			sessions, err := store.List(f)
+			if err != nil {
+				return err
+			}
+			sessions, err = applyRounding(sessions, round)
 			if err != nil {
 				return err
 			}
@@ -60,6 +66,7 @@ func newLogCmd(store internal.Store) *cobra.Command {
 	cmd.Flags().StringVarP(&weekStr, "week", "w", "", `Filter by week: "this", "last", or "2026-W40"`)
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Filter by tag")
 	cmd.Flags().BoolVarP(&asJSON, "json", "j", false, "Output as JSON")
+	addRoundFlag(cmd, &round)
 
 	return cmd
 }

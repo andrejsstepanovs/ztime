@@ -437,3 +437,22 @@ func TestE2E_ReportShowsWorkPeriods(t *testing.T) {
 	requireContains(t, out, "12:30 - 17:30  5h 0m")
 	requireContains(t, out, "total  8h 0m")
 }
+
+func TestE2E_ReportRoundFlag(t *testing.T) {
+	run := harness(t)
+
+	_, err := run("start", "--at", "2026-10-01T09:07")
+	require.NoError(t, err)
+	_, err = run("stop", "--at", "2026-10-01T12:13", "--force")
+	require.NoError(t, err)
+
+	out, err := run("report", "--date", "2026-10-01", "--round", "10")
+	require.NoError(t, err)
+	requireContains(t, out, "09:00 - 12:20  3h 20m")
+	requireContains(t, out, "total  3h 20m")
+
+	// Without the flag the real times are shown.
+	out, err = run("report", "--date", "2026-10-01")
+	require.NoError(t, err)
+	requireContains(t, out, "09:07 - 12:13  3h 6m")
+}

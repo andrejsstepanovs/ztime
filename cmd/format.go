@@ -3,6 +3,10 @@ package cmd
 import (
 	"fmt"
 	"time"
+
+	"github.com/spf13/cobra"
+
+	"github.com/astepanovs/ztime/internal"
 )
 
 const displayLayout = "15:04"
@@ -45,4 +49,25 @@ func fmtDuration(d time.Duration) string {
 		return fmt.Sprintf("%dh %dm", h, m)
 	}
 	return fmt.Sprintf("%dm", m)
+}
+
+// addRoundFlag registers the shared --round display-rounding flag.
+func addRoundFlag(cmd *cobra.Command, p *int) {
+	cmd.Flags().IntVarP(p, "round", "r", 0,
+		"Round times for display: start down, stop up, to a multiple of N minutes (e.g. 5, 10, 15, 30)")
+}
+
+// applyRounding rounds entry times for display. zero minutes disables it.
+func applyRounding(entries []internal.Entry, minutes int) ([]internal.Entry, error) {
+	if minutes < 0 {
+		return nil, fmt.Errorf("--round must be a positive number of minutes")
+	}
+	if minutes == 0 {
+		return entries, nil
+	}
+	step := time.Duration(minutes) * time.Minute
+	for i := range entries {
+		entries[i] = entries[i].Rounded(step)
+	}
+	return entries, nil
 }

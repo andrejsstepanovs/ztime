@@ -170,6 +170,7 @@ ztime log --tag work --json
 | `--week` | `-w` | Filter by week: `this`, `last`, or `YYYY-Www`. |
 | `--tag` | `-t` | Filter by tag. |
 | `--json` | `-j` | Output as JSON. |
+| `--round` | `-r` | Round times for display: start down, stop up, to a multiple of N minutes (e.g. `5`, `10`, `15`, `30`). Affects shown times and totals only; stored data is unchanged. |
 
 ### task
 
@@ -245,6 +246,7 @@ worked 16h 0m  target 16h 0m  balance +0m
 |------|-------|-------------|
 | `--date` | `-d` | Scope to a date. |
 | `--week` | `-w` | Scope to a week. |
+| `--round` | `-r` | Round worked times for display: start down, stop up, to a multiple of N minutes. Affects `worked` and `balance` only; stored data and the 8-hour target are unchanged. |
 
 ### report
 
@@ -255,6 +257,7 @@ Open entries are marked as not ready.
 ztime report
 ztime report --date yesterday
 ztime report --week this
+ztime report --round 10
 ```
 
 ```text
@@ -263,6 +266,12 @@ ztime report --week this
   12:30 - 17:30  5h 0m
   total  8h 0m
 ```
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--date` | `-d` | Filter by date: `today`, `yesterday`, or `YYYY-MM-DD`. |
+| `--week` | `-w` | Filter by week: `this`, `last`, or `YYYY-Www`. |
+| `--round` | `-r` | Round times for display: start down, stop up, to a multiple of N minutes (e.g. `5`, `10`). Affects shown times and the daily total only; stored data is unchanged. |
 
 ### validate
 

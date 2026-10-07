@@ -11,6 +11,7 @@ import (
 
 func newReportCmd(store internal.Store) *cobra.Command {
 	var dateStr, weekStr string
+	var round int
 
 	cmd := &cobra.Command{
 		Use:   "report",
@@ -20,7 +21,8 @@ into the company time-tracking tool. Open periods are marked as not ready and
 must be stopped before they can be entered as complete periods.`,
 		Example: `  ztime report
   ztime report --date yesterday
-  ztime report --week this`,
+  ztime report --week this
+  ztime report --round 10`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if dateStr == "" && weekStr == "" {
 				dateStr = "today"
@@ -30,6 +32,10 @@ must be stopped before they can be entered as complete periods.`,
 				return err
 			}
 			entries, err := store.List(filter)
+			if err != nil {
+				return err
+			}
+			entries, err = applyRounding(entries, round)
 			if err != nil {
 				return err
 			}
@@ -43,6 +49,7 @@ must be stopped before they can be entered as complete periods.`,
 	}
 	cmd.Flags().StringVarP(&dateStr, "date", "d", "", `Filter by date: "today", "yesterday", or "2026-10-01" (default: today)`)
 	cmd.Flags().StringVarP(&weekStr, "week", "w", "", `Filter by week: "this", "last", or "2026-W40"`)
+	addRoundFlag(cmd, &round)
 	return cmd
 }
 
