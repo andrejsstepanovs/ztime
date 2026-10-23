@@ -14,8 +14,9 @@ func newBalanceCmd(store internal.Store) *cobra.Command {
 	var round int
 
 	cmd := &cobra.Command{
-		Use:   "balance",
-		Short: "Show cumulative plus or minus working time",
+		Use:     "balance",
+		Aliases: []string{"budget"},
+		Short:   "Show cumulative plus or minus working time",
 		Long: `Balance compares recorded work with an 8-hour target on each logged
 ordinary weekday. Days without work entries are ignored. Logged weekend and
 nationwide German public-holiday work has a zero target and therefore counts

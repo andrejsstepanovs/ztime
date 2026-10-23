@@ -18,6 +18,32 @@ func parseTimeArg(s string) (time.Time, error) {
 	return parseTimeArgOn(s, time.Now())
 }
 
+// parseTimeArgWithDate applies an optional date to a clock time. Without a
+// clock time it keeps ref's local clock time on the selected date.
+func parseTimeArgWithDate(s, date string, ref time.Time) (time.Time, error) {
+	var day time.Time
+	if date != "" {
+		var err error
+		day, err = parseDate(date)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("--date: %w", err)
+		}
+		ref = ref.In(time.Local)
+		ref = time.Date(day.Year(), day.Month(), day.Day(), ref.Hour(), ref.Minute(), ref.Second(), ref.Nanosecond(), time.Local)
+	}
+	if s == "" {
+		return ref, nil
+	}
+	t, err := parseTimeArgOn(s, ref)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if date != "" && t.Format(displayDateLayout) != day.Format(displayDateLayout) {
+		return time.Time{}, fmt.Errorf("time %q conflicts with --date %q", s, date)
+	}
+	return t, nil
+}
+
 // parseTimeArgOn parses a time argument, anchoring a bare "HH:MM" to the
 // calendar day of ref. Full timestamps are used as-is.
 func parseTimeArgOn(s string, ref time.Time) (time.Time, error) {

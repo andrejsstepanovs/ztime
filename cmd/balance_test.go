@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -12,12 +13,16 @@ import (
 )
 
 func TestBalance_NoEntries(t *testing.T) {
-	store := mocks.NewMockStore(t)
-	store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
+	for _, name := range []string{"balance", "budget"} {
+		t.Run(name, func(t *testing.T) {
+			store := mocks.NewMockStore(t)
+			store.EXPECT().List(mock.AnythingOfType("internal.LogFilter")).Return(nil, nil)
 
-	out, err := execute(t, store, "balance")
-	require.NoError(t, err)
-	requireContains(t, out, "no work entries found")
+			out, err := execute(t, store, name)
+			assert.NoError(t, err)
+			assert.Contains(t, out, "no work entries found")
+		})
+	}
 }
 
 func TestBalance_PrintsDailyAndTotalBalance(t *testing.T) {

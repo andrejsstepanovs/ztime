@@ -10,7 +10,7 @@ import (
 )
 
 func newEditCmd(store internal.Store) *cobra.Command {
-	var tag, startedAt, stoppedAt, note, breakNote string
+	var tag, startedAt, stoppedAt, date, note, breakNote string
 	var breakQualifies bool
 
 	cmd := withArguments(&cobra.Command{
@@ -18,8 +18,12 @@ func newEditCmd(store internal.Store) *cobra.Command {
 		Short: "Edit an entry",
 		Args:  cobra.ExactArgs(1),
 		Example: `  ztime edit 42 -s 09:05
+  ztime edit 42 --stop 18:00 --date yesterday
   ztime edit 42 -n "revised note"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.Flags().Changed("date") && startedAt == "" && stoppedAt == "" {
+				return fmt.Errorf("--date requires --start or --stop")
+			}
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				return fmt.Errorf("invalid id %q", args[0])
@@ -38,7 +42,7 @@ func newEditCmd(store internal.Store) *cobra.Command {
 				p.Tag = &tag
 			}
 			if startedAt != "" {
-				t, err := parseTimeArgOn(startedAt, entry.StartedAt)
+				t, err := parseTimeArgWithDate(startedAt, date, entry.StartedAt)
 				if err != nil {
 					return fmt.Errorf("--start: %w", err)
 				}
@@ -54,7 +58,7 @@ func newEditCmd(store internal.Store) *cobra.Command {
 				} else if entry.StoppedAt != nil {
 					day = *entry.StoppedAt
 				}
-				t, err := parseTimeArgOn(stoppedAt, day)
+				t, err := parseTimeArgWithDate(stoppedAt, date, day)
 				if err != nil {
 					return fmt.Errorf("--stop: %w", err)
 				}
@@ -85,6 +89,7 @@ func newEditCmd(store internal.Store) *cobra.Command {
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Change tag")
 	cmd.Flags().StringVarP(&startedAt, "start", "s", "", "Change start time")
 	cmd.Flags().StringVarP(&stoppedAt, "stop", "S", "", "Change stop time")
+	cmd.Flags().StringVarP(&date, "date", "d", "", `Date for supplied start/stop times: "today", "yesterday", or "YYYY-MM-DD" (default: entry date)`)
 	cmd.Flags().StringVarP(&note, "note", "n", "", "Change note")
 	cmd.Flags().StringVarP(&breakNote, "break-note", "b", "", "Change the reason for the following break")
 	cmd.Flags().BoolVar(&breakQualifies, "break", false, "Mark the following gap as a legally qualifying rest break")

@@ -10,7 +10,7 @@ import (
 )
 
 func newStopCmd(store internal.Store) *cobra.Command {
-	var tag, at, reason string
+	var tag, at, date, reason string
 	var force bool
 	var legalBreak bool
 
@@ -23,15 +23,12 @@ A qualifying break must last at least 15 minutes. Commuting and gaps that are
 not rest breaks must not be marked with --break.`,
 		Example: `  ztime stop
 	  ztime stop --break --reason "lunch"
-	  ztime stop --at 17:30 --reason "commute home"`,
+	  ztime stop --at 17:30 --reason "commute home"
+	  ztime stop --date yesterday --at 18:00`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			stoppedAt := time.Now()
-			if at != "" {
-				var err error
-				stoppedAt, err = parseTimeArg(at)
-				if err != nil {
-					return err
-				}
+			stoppedAt, err := parseTimeArgWithDate(at, date, time.Now())
+			if err != nil {
+				return err
 			}
 
 			entries, err := loadEntries(store)
@@ -79,6 +76,7 @@ not rest breaks must not be marked with --break.`,
 
 	cmd.Flags().StringVarP(&tag, "tag", "t", "work", "Tag of the open entry to stop (default: work)")
 	cmd.Flags().StringVarP(&at, "at", "a", "", `Override stop time, e.g. "17:30"`)
+	cmd.Flags().StringVarP(&date, "date", "d", "", `Stop date: "today", "yesterday", or "YYYY-MM-DD" (default: today)`)
 	cmd.Flags().StringVarP(&reason, "reason", "r", "", "Reason for the break beginning at this stop")
 	cmd.Flags().BoolVarP(&legalBreak, "break", "b", false, "Mark the following gap as a legally qualifying rest break")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Bypass validation errors")

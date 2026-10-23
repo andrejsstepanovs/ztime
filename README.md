@@ -90,6 +90,7 @@ Start a work entry.
 ```sh
 ztime start
 ztime start --at 09:00
+ztime start --date yesterday --at 09:00
 ztime start --task "Morning monitoring"
 ```
 
@@ -97,6 +98,7 @@ ztime start --task "Morning monitoring"
 |------|-------|-------------|
 | `--tag` | `-t` | Entry tag. Default: `work`. |
 | `--at` | `-a` | Override start time. Accepts `HH:MM` or `YYYY-MM-DDTHH:MM`. |
+| `--date` | `-d` | Start date: `today`, `yesterday`, or `YYYY-MM-DD`. Default: today. |
 | `--task` | `-k` | Record an initial task at the same time as the start. |
 | `--force` | `-f` | Bypass a working-time rule violation. Use only for approved exceptions. |
 
@@ -112,17 +114,23 @@ Stop the current open work entry.
 ztime stop
 ztime stop --break --reason "lunch"
 ztime stop --at 17:30 --reason "commute home"
+ztime stop --date yesterday --at 18:00
 ```
 
 | Flag | Short | Description |
 |------|-------|-------------|
 | `--tag` | `-t` | Tag of the open entry to stop. Default: `work`. |
 | `--at` | `-a` | Override stop time. |
+| `--date` | `-d` | Stop date: `today`, `yesterday`, or `YYYY-MM-DD`. Default: today. |
 | `--break` | `-b` | Declare that the following gap is a legally qualifying rest break. |
 | `--reason` | `-r` | Describe the gap that follows the stop. |
 
 `ztime stop` is always permitted. The tool reports violations after the stop
 but does not prevent recording the stop.
+
+Use `--date` with `--at` to record a start or stop on another day.
+Without `--at`, the command uses the current local clock time on the selected date.
+If a full timestamp conflicts with `--date`, the command returns an error.
 
 A gap between entries counts as a statutory break only when you pass `--break`.
 A qualifying break must last at least 15 minutes. Commuting to the office is
@@ -203,6 +211,7 @@ Edit a work entry by its ID. The ID appears in `ztime log` and `ztime status`.
 
 ```sh
 ztime edit 1 --start 09:05
+ztime edit 35 --stop 18:00 --date yesterday
 ztime edit 1 --break-note "lunch"
 ztime edit 1 --break
 ```
@@ -212,9 +221,15 @@ ztime edit 1 --break
 | `--tag` | `-t` | Change the tag. |
 | `--start` | `-s` | Change the start time. |
 | `--stop` | `-S` | Change the stop time. |
+| `--date` | `-d` | Date for supplied start/stop times: `today`, `yesterday`, or `YYYY-MM-DD`. Requires `--start` or `--stop`. |
 | `--note` | `-n` | Change the entry note. |
 | `--break-note` | `-b` | Change the break reason. |
 | `--break` | | Set or clear the qualifying-break flag. |
+
+`--date` applies only to the times you supply. Other timestamps remain unchanged.
+Without `--date`, a clock time keeps the corresponding entry date.
+If you change both times, the stop uses the new start date.
+Full timestamps remain supported. A timestamp must match `--date` when you supply both.
 
 ### delete
 
@@ -225,6 +240,8 @@ ztime delete 42
 ```
 
 ### balance
+
+Alias: `budget`. Both names accept the same flags.
 
 Show cumulative plus or minus working time. Days with no work entries are
 ignored. Logged weekend and public-holiday work has a zero-hour target, so

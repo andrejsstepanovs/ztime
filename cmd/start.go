@@ -12,7 +12,7 @@ import (
 const gapWarnThreshold = 2 * time.Hour
 
 func newStartCmd(store internal.Store) *cobra.Command {
-	var tag, at, taskText string
+	var tag, at, date, taskText string
 	var force bool
 
 	cmd := &cobra.Command{
@@ -23,15 +23,12 @@ starting to work on. This is equivalent to running 'ztime start' followed by
 'ztime task', but both records are created together.`,
 		Example: `  ztime start
   ztime start --tag lunch
-  ztime start --at 09:00 --task "Monitor Lux async release"`,
+  ztime start --at 09:00 --task "Monitor Lux async release"
+  ztime start --date yesterday --at 09:00`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			startedAt := time.Now()
-			if at != "" {
-				var err error
-				startedAt, err = parseTimeArg(at)
-				if err != nil {
-					return err
-				}
+			startedAt, err := parseTimeArgWithDate(at, date, time.Now())
+			if err != nil {
+				return err
 			}
 
 			entries, err := loadEntries(store)
@@ -82,6 +79,7 @@ starting to work on. This is equivalent to running 'ztime start' followed by
 
 	cmd.Flags().StringVarP(&tag, "tag", "t", "work", "Entry tag")
 	cmd.Flags().StringVarP(&at, "at", "a", "", `Override start time, e.g. "09:00" or "2026-10-01T09:00"`)
+	cmd.Flags().StringVarP(&date, "date", "d", "", `Start date: "today", "yesterday", or "YYYY-MM-DD" (default: today)`)
 	cmd.Flags().StringVarP(&taskText, "task", "k", "", "Task you are starting to work on")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Bypass validation errors")
 
